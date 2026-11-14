@@ -1,0 +1,40 @@
+name: PR Flow
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Windows PowerShell tests
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: codebeltnet/git-checkout@v1
+        with:
+          ref: ${{ github.sha }}
+      - name: Run isolated tests
+        shell: pwsh
+        run: pwsh -NoProfile -File ./tests/Update-Claude.Tests.ps1
+      - name: Determine snapshot version
+        id: version
+        shell: pwsh
+        run: |
+          $version = "snapshot-$env:GITHUB_RUN_NUMBER.$env:GITHUB_RUN_ATTEMPT-$($env:GITHUB_SHA.Substring(0, 7))"
+          "artifact-name=Update-Claude-$version" >> $env:GITHUB_OUTPUT
+      - name: Upload tested script
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: ${{ steps.version.outputs.artifact-name }}
+          path: Update-Claude.ps1
+          if-no-files-found: error
+          retention-days: 30

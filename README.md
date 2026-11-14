@@ -33,6 +33,12 @@ pwsh -NoProfile -File ./Update-Claude.ps1
 
 Already cloned it? Use `git pull --ff-only` to get the latest updater before running it.
 
+### Download just the script
+
+Tagged [GitHub Releases](https://github.com/gimlichael/claude-autoupdate/releases) provide `Update-Claude.ps1` as a standalone asset, with its MIT notice included. Download it, open PowerShell 7 in that folder, and use the same commands above. No clone is needed.
+
+For development snapshots, open a successful [PR Flow run](https://github.com/gimlichael/claude-autoupdate/actions/workflows/pr.yml) and download its `Update-Claude-snapshot-<run>.<attempt>-<commit>` artifact. The ZIP contains only `Update-Claude.ps1`. CI artifacts expire after 30 days and require a GitHub login to download; release assets remain available until removed.
+
 ## Requirements
 
 - Windows x64 and PowerShell 7 (`pwsh`), rather than Windows PowerShell 5.1.
@@ -103,7 +109,7 @@ Fork it, make a focused change, and open a PR against `main`. See [CONTRIBUTING.
 pwsh -NoProfile -File ./tests/Update-Claude.Tests.ps1
 ```
 
-Tests use temporary fixtures without downloading Claude or changing your installed executables. [CI](.github/workflows/ci.yml) uses Codebelt's `git-checkout` action and runs the same suite on Windows for pushes and pull requests. It requires no repository secrets. Codebelt's shared .NET test workflows do not apply to this standalone PowerShell script.
+Tests use temporary fixtures without downloading Claude or changing your installed executables. [PR Flow](.github/workflows/pr.yml) runs the same suite on Windows for PRs targeting `main` and manual checks, then uploads a snapshot. [Release Flow](.github/workflows/release.yml) independently tests pushed release tags and publishes the tested script. Both use Codebelt's `git-checkout` action and require no repository secrets. Codebelt's shared .NET test workflows do not apply to this standalone PowerShell script.
 
 Found a bug or have an idea? [Open an issue](https://github.com/gimlichael/claude-autoupdate/issues). If this saves you a few clicks, a star helps other Windows developers find it.
 

@@ -36,3 +36,18 @@ For an optional live metadata check, use `pwsh -NoProfile -File ./Update-Claude.
 Open a PR describing the problem, the resulting behavior, and the checks you ran. Report failures with the command, PowerShell version (`$PSVersionTable.PSVersion`), and redacted output. Remove usernames, private paths, tokens, and other personal information before posting.
 
 Contributions are made under the repository's [MIT license](LICENSE). That license covers this updater; Claude Code remains governed by Anthropic's terms.
+
+## Publish a version
+
+After merging the release-ready changes into `main`, tag that commit and push the tag:
+
+```powershell
+git switch main
+git pull --ff-only
+git tag -a v1.0.0 -m 'Release v1.0.0'
+git push origin v1.0.0
+```
+
+Choose the next version rather than reusing an existing tag. Tags must follow `vMAJOR.MINOR.PATCH`. [Release Flow](.github/workflows/release.yml) runs only for `v*` tag pushes. It validates the tag format, tests the tagged source, uploads a versioned artifact containing only `Update-Claude.ps1`, then creates a GitHub Release with generated notes and that exact script attached. The release job downloads the tested artifact; it does not rebuild or modify the script. Failed tests or artifact uploads prevent publication.
+
+[PR Flow](.github/workflows/pr.yml) runs for PRs targeting `main` and manual checks, producing snapshot artifacts. Ordinary branch pushes do not trigger a workflow. Manual PR Flow runs never publish releases, even when a tag is selected. Publishing uses the built-in GitHub token; forks do not need personal access tokens or other repository secrets. An existing release is not overwritten on a rerun; the publication step reports an error instead.

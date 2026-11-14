@@ -109,7 +109,7 @@ Fork it, make a focused change, and open a PR against `main`. See [CONTRIBUTING.
 pwsh -NoProfile -File ./tests/Update-Claude.Tests.ps1
 ```
 
-Tests use temporary fixtures without downloading Claude or changing your installed executables. [PR Flow](.github/workflows/pr.yml) runs the same suite on Windows for PRs targeting `main` and manual checks, then uploads a snapshot. [Release Flow](.github/workflows/release.yml) independently tests pushed release tags and publishes the tested script. Both use Codebelt's `git-checkout` action and require no repository secrets. Codebelt's shared .NET test workflows do not apply to this standalone PowerShell script.
+Tests use temporary fixtures without downloading Claude or changing your installed executables. [PR Flow](.github/workflows/pr.yml) runs the same suite on Windows for PRs targeting `main` and manual checks, then uploads a snapshot. [Release Flow](.github/workflows/release.yml) independently tests pushed release tags and attaches the tested script to a draft release titled exactly after the tag (for example `v1.0.0`). The maintainer edits the description and publishes manually. Both use Codebelt's `git-checkout` action and require no repository secrets. Codebelt's shared .NET test workflows do not apply to this standalone PowerShell script.
 
 Found a bug or have an idea? [Open an issue](https://github.com/gimlichael/claude-autoupdate/issues). If this saves you a few clicks, a star helps other Windows developers find it.
 

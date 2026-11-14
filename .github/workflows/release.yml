@@ -43,7 +43,7 @@ jobs:
           retention-days: 30
 
   release:
-    name: Publish tagged release
+    name: Create tagged draft release
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -58,5 +58,5 @@ jobs:
     steps:
       - name: Download tested script
         run: gh run download "$GITHUB_RUN_ID" --name "$ARTIFACT_NAME" --dir release
-      - name: Publish script as release asset
-        run: gh release create "$RELEASE_TAG" release/Update-Claude.ps1 --verify-tag --generate-notes --title "Claude AutoUpdate $RELEASE_TAG"
+      - name: Create draft release with tested script
+        run: gh release create "$RELEASE_TAG" release/Update-Claude.ps1 --verify-tag --draft --generate-notes --title "$RELEASE_TAG"

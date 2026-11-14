@@ -1,0 +1,62 @@
+name: Release Flow
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test tagged script
+    runs-on: windows-latest
+    timeout-minutes: 5
+    outputs:
+      artifact-name: ${{ steps.version.outputs.artifact-name }}
+    steps:
+      - name: Checkout tagged commit
+        uses: codebeltnet/git-checkout@v1
+        with:
+          ref: ${{ github.sha }}
+      - name: Validate release version
+        id: version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_NAME -notmatch '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') {
+              throw 'Release tags must use vMAJOR.MINOR.PATCH, for example v1.0.0.'
+          }
+          "artifact-name=Update-Claude-$env:GITHUB_REF_NAME" >> $env:GITHUB_OUTPUT
+      - name: Run isolated tests
+        shell: pwsh
+        run: pwsh -NoProfile -File ./tests/Update-Claude.Tests.ps1
+      - name: Upload tested script
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: ${{ steps.version.outputs.artifact-name }}
+          path: Update-Claude.ps1
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: Publish tagged release
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ARTIFACT_NAME: ${{ needs.test.outputs.artifact-name }}
+      RELEASE_TAG: ${{ github.ref_name }}
+    steps:
+      - name: Download tested script
+        run: gh run download "$GITHUB_RUN_ID" --name "$ARTIFACT_NAME" --dir release
+      - name: Publish script as release asset
+        run: gh release create "$RELEASE_TAG" release/Update-Claude.ps1 --verify-tag --generate-notes --title "Claude AutoUpdate $RELEASE_TAG"

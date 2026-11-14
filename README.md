@@ -17,7 +17,17 @@ Independent community tool; not affiliated with or endorsed by Anthropic.
 
 ## Quick start
 
-In PowerShell 7:
+Close your Claude sessions, then run this one-liner in PowerShell 7 to update **all** native installations on PATH without cloning or saving the script:
+
+```powershell
+irm https://github.com/gimlichael/claude-autoupdate/releases/latest/download/Update-Claude.ps1 | iex
+```
+
+`irm` (`Invoke-RestMethod`) downloads the updater from the latest published release, and `iex` (`Invoke-Expression`) runs it immediately. The updater checks for the latest stable Claude Code release.
+
+### Clone and check first
+
+To check installed versions before updating, clone the repository and run:
 
 ```powershell
 git clone https://github.com/gimlichael/claude-autoupdate.git
